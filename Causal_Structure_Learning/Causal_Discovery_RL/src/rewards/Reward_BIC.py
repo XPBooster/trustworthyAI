@@ -107,13 +107,13 @@ class get_Reward(object):
 
             # no parents, then simply use mean
             if np.sum(col) < 0.1:
-                y_err = self.inputdata[:, i]
+                y_err = self.inputdata.iloc[:, i]
                 y_err = y_err - np.mean(y_err)
 
             else:
                 cols_TrueFalse = col > 0.5
-                X_train = self.inputdata[:, cols_TrueFalse]
-                y_train = self.inputdata[:, i]
+                X_train = self.inputdata.iloc[:, cols_TrueFalse]
+                y_train = self.inputdata.iloc[:, i]
                 y_err = self.calculate_yerr(X_train, y_train)
 
             RSSi = np.sum(np.square(y_err))

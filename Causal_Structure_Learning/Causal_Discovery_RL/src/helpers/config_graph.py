@@ -38,11 +38,11 @@ net_arg.add_argument('--bias_initial_value', type=float, default=False,
 data_arg = add_argument_group('Data')
 data_arg.add_argument('--batch_size', type=int, default=64, help='batch size for training')
 data_arg.add_argument('--input_dimension', type=int, default=64, help='dimension of reshaped vector') # reshaped
-data_arg.add_argument('--max_length', type=int, default=6, help='number of variables')
+data_arg.add_argument('--max_length', type=int, default=55, help='number of variables')
 data_arg.add_argument('--data_size', type=int, default=3000, help='Number of observational samples')
 
-data_arg.add_argument('--read_data', action="store_true", help='read existing_data or not')
-data_arg.add_argument('--data_path', type=str, default='data', help='data path for read data')
+data_arg.add_argument('--read_data', type=bool, default=True, help='read existing_data or not')
+data_arg.add_argument('--data_path', type=str, default='Datasets', help='data path for read data')
 data_arg.add_argument('--normalize', action="store_true", help='whether the inputdata shall be normalized')
 data_arg.add_argument('--transpose', action="store_true", help='whether the true graph needs transposed')
 

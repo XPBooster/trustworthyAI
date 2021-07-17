@@ -12,7 +12,8 @@ class DataGenerator(object):
 
     def __init__(self, file_path, solution_path=None, normalize_flag=False, transpose_flag=False):
 
-        self.inputdata = np.load(file_path)
+        self.inputdata = np.load(file_path, allow_pickle=True)
+        # self.inputdata = np.loadtxt(file_path, delimiter=',', skiprows=1)
         self.datasize, self.d = self.inputdata.shape
 
         if normalize_flag:
@@ -21,7 +22,7 @@ class DataGenerator(object):
         if solution_path is None:
             gtrue = np.zeros(self.d)
         else:
-            gtrue = np.load(solution_path)
+            gtrue = np.load(solution_path, allow_pickle=True)
             if transpose_flag: 
                 gtrue = np.transpose(gtrue)
 
@@ -30,7 +31,7 @@ class DataGenerator(object):
 
     def gen_instance_graph(self, max_length, dimension, test_mode=False):
         seq = np.random.randint(self.datasize, size=(dimension))
-        input_ = self.inputdata[seq]
+        input_ = self.inputdata.iloc[seq,:]
         return input_.T
 
     # Generate random batch for training procedure

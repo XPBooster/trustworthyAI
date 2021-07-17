@@ -28,7 +28,7 @@ from helpers.log_helper import LogHelper
 from helpers.tf_utils import set_seed
 from helpers.analyze_utils import convert_graph_int_to_adj_mat, graph_prunned_by_coef, \
                                   count_accuracy, graph_prunned_by_coef_2nd
-from helpers.cam_with_pruning_cam import pruning_cam
+# from helpers.cam_with_pruning_cam import pruning_cam
 from helpers.lambda_utils import BIC_lambdas
 
 # Configure matplotlib for plotting
@@ -67,8 +67,8 @@ def main():
     _logger.info('Configuration parameters: {}'.format(vars(config)))    # Use vars to convert config to dict for logging
     
     if config.read_data:
-        file_path = '{}/data.npy'.format(config.data_path)
-        solution_path = '{}/DAG.npy'.format(config.data_path)
+        file_path = '{}/real_data'.format(config.data_path)
+        solution_path = '{}/true_graph'.format(config.data_path)
         training_set = DataGenerator_read_data(file_path, solution_path, config.normalize, config.transpose)
     else:
         raise ValueError("Only support importing data from existing files")
@@ -312,3 +312,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
