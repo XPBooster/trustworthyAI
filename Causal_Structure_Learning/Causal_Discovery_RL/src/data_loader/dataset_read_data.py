@@ -4,26 +4,26 @@
 """ read datasets from existing files"""
 
 import numpy as np
+import pandas as pd
 from sklearn.preprocessing import StandardScaler
-
+from torch.utils.data import Dataset
 
 class DataGenerator(object):
 
 
-    def __init__(self, file_path, solution_path=None, normalize_flag=False, transpose_flag=False):
+    def __init__(self, config):
 
-        self.inputdata = np.load(file_path, allow_pickle=True)
-        # self.inputdata = np.loadtxt(file_path, delimiter=',', skiprows=1)
+        self.inputdata = pd.read_csv(config.data_path)
         self.datasize, self.d = self.inputdata.shape
 
-        if normalize_flag:
+        if config.normalize:
             self.inputdata = StandardScaler().fit_transform(self.inputdata)
 
-        if solution_path is None:
+        if config.graph_path is None:
             gtrue = np.zeros(self.d)
         else:
-            gtrue = np.load(solution_path, allow_pickle=True)
-            if transpose_flag: 
+            gtrue = np.array(pd.read_csv(config.graph_path))
+            if config.transpose:
                 gtrue = np.transpose(gtrue)
 
         # (i,j)=1 => node i -> node j
@@ -31,7 +31,7 @@ class DataGenerator(object):
 
     def gen_instance_graph(self, max_length, dimension, test_mode=False):
         seq = np.random.randint(self.datasize, size=(dimension))
-        input_ = self.inputdata[seq,:]
+        input_ = self.inputdata[seq]
         return input_.T
 
     # Generate random batch for training procedure
@@ -39,7 +39,46 @@ class DataGenerator(object):
         input_batch = []
 
         for _ in range(batch_size):
-            input_= self.gen_instance_graph(max_length, dimension)
+            input_ = self.gen_instance_graph(max_length, dimension) # (feature_num, dimension(sample_seq))
             input_batch.append(input_)
 
         return input_batch
+
+
+class CausalDataSet(Dataset):
+
+
+    def __init__(self, config):
+
+        self.config = config
+        self.inputdata = pd.read_csv(config.data_path)
+        self.inputdata = StandardScaler().fit_transform(self.inputdata) if config.normalize else self.inputdata
+        self.datasize, self.d = self.inputdata.shape
+
+        if config.graph_path is None:
+            gtrue = np.zeros(self.d)
+        else:
+            gtrue = np.array(pd.read_csv(config.graph_path))
+            if config.transpose:
+                gtrue = np.transpose(gtrue)
+
+        # (i,j)=1 => node i -> node j
+        self.true_graph = np.int32(np.abs(gtrue) > 1e-3)
+
+    def __getitem__(self, index):
+        """
+
+        Parameters
+        ----------
+        index: It has no meaning in this DataSet. We randomly sample data in each iter.
+
+        Returns: Randomly sampled data.
+        -------
+
+        """
+        seq = np.random.randint(self.datasize, size=(self.config.input_dimension))
+        return self.inputdata[seq].T
+
+    def __len__(self):
+
+        return self.datasize

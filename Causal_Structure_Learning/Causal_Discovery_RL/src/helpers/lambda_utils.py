@@ -34,7 +34,7 @@ def BIC_input_graph(X, g, reg_type='LR', score_type='BIC'):
 
     for i in range(n):
         y_ = X[:, [i]]
-        inds_x = list(np.abs(g[i])>0.1)
+        inds_x = list(np.abs(g[i]) > 0.1)
 
         if np.sum(inds_x) < 0.1: 
             y_pred = np.mean(y_)

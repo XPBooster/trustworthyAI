@@ -64,23 +64,23 @@ class Actor(object):
         with tf.variable_scope("encoder"):
             if self.config.encoder_type == 'TransformerEncoder':
                 encoder = TransformerEncoder(self.config, self.is_train)
-            elif self.config.encoder_type == 'GATEncoder':
-                encoder = GATEncoder(self.config, self.is_train)
-            else:
-                raise NotImplementedError('Current encoder type is not implemented yet!')
+            # elif self.config.encoder_type == 'GATEncoder':
+            #     encoder = GATEncoder(self.config, self.is_train)
+            # else:
+            #     raise NotImplementedError('Current encoder type is not implemented yet!')
             self.encoder_output = encoder.encode(self.input_)
 
         with tf.variable_scope('decoder'):
             if self.config.decoder_type == 'SingleLayerDecoder':
                 self.decoder = SingleLayerDecoder(self.config, self.is_train)
-            elif self.config.decoder_type == 'TransformerDecoder':
-                self.decoder = TransformerDecoder(self.config, self.is_train)
-            elif self.config.decoder_type == 'BilinearDecoder':
-                self.decoder = BilinearDecoder(self.config, self.is_train)
-            elif self.config.decoder_type == 'NTNDecoder':
-                self.decoder = NTNDecoder(self.config, self.is_train)
-            else:
-                raise NotImplementedError('Current decoder type is not implemented yet!')
+            # elif self.config.decoder_type == 'TransformerDecoder':
+            #     self.decoder = TransformerDecoder(self.config, self.is_train)
+            # elif self.config.decoder_type == 'BilinearDecoder':
+            #     self.decoder = BilinearDecoder(self.config, self.is_train)
+            # elif self.config.decoder_type == 'NTNDecoder':
+            #     self.decoder = NTNDecoder(self.config, self.is_train)
+            # else:
+            #     raise NotImplementedError('Current decoder type is not implemented yet!')
 
             self.samples, self.scores, self.entropy = self.decoder.decode(self.encoder_output)
 

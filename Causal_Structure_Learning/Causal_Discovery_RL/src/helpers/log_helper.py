@@ -1,9 +1,31 @@
 import sys
 import logging
-import pathlib
 from datetime import datetime
 from pytz import timezone, utc
+from visualdl import LogWriter
+import os.path as osp
+import time
+class VisualLogger():
 
+    def __init__(self, log_dir='./log'):
+
+        self.log_dir = osp.join(log_dir, time.strftime("%Y%m%d%H%M%S", time.localtime()))
+        self.writer = LogWriter(logdir=osp.join(self.log_dir))
+
+    def hparams(self, hparams_dict, metrics_list):
+
+        self.writer.add_hparams(hparams_dict=hparams_dict, metrics_list=metrics_list)
+
+    def scalar(self, tag, step, value):
+
+        assert type(step) is int
+        assert type(tag) is str
+        assert type(value) is float or int
+        self.writer.add_scalar(tag=tag, value=value, step=step)
+
+    def close(self):
+
+        self.writer.close()
 
 class LogHelper(object):
     log_format = '%(asctime)s %(levelname)s - %(name)s - %(message)s'

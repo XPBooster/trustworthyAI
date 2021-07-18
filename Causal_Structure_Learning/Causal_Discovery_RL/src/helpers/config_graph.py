@@ -20,7 +20,7 @@ net_arg = add_argument_group('Network')
 # Encoder
 net_arg.add_argument('--encoder_type', type=str, default='TransformerEncoder', help='type of encoder used')
 net_arg.add_argument('--hidden_dim', type=int, default=64, help='actor LSTM num_neurons')
-net_arg.add_argument('--num_heads', type=int, default=16, help='actor input embedding')
+net_arg.add_argument('--num_heads', type=int, default=8, help='actor input embedding')
 net_arg.add_argument('--num_stacks', type=int, default=6, help='actor LSTM num_neurons')
 net_arg.add_argument('--residual', type=bool, default=True, help='whether to use residual for gat encoder')
 
@@ -41,7 +41,8 @@ data_arg.add_argument('--max_length', type=int, default=55, help='number of vari
 data_arg.add_argument('--data_size', type=int, default=3000, help='Number of observational samples')
 
 data_arg.add_argument('--read_data', type=bool, default=True, help='read existing_data or not')
-data_arg.add_argument('--data_path', type=str, default='Datasets', help='data path for read data')
+data_arg.add_argument('--data_path', type=str, default='./Datasets/real_data.csv', help='data path for read data')
+data_arg.add_argument('--graph_path', type=str, default='Datasets/real_graph.csv', help='data path for read graph')
 data_arg.add_argument('--normalize', type=bool, default=True, help='whether the inputdata shall be normalized')
 data_arg.add_argument('--transpose', type=bool, default=True, help='whether the true graph needs transposed')
 

@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import tensorflow as tf
+import os
 
 
 def is_cuda_available():
