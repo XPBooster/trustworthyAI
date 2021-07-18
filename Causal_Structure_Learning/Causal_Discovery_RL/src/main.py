@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Python codes for 'Causal Discovery with Reinforcement Learning', ICLR 2020 (oral)
-Authors: Shengyu Zhu, Huawei Noah's Ark Lab,
-         Ignavier Ng, University of Toronto (work was done during an internship at Huawei Noah's Ark Lab)
-         Zhitang Chen, Huawei Noah's Ark Lab
-"""
 
 import os
 import logging
@@ -43,8 +37,7 @@ def main():
     LogHelper.setup(log_path='{}/training.log'.format(output_dir),
                     level_str='INFO')
     _logger = logging.getLogger(__name__)
-    _logger.info('Python version is {}'.format(platform.python_version()))
-    _logger.info('Current commit of code: ___')
+
 
     # Get running configuration
     config, _ = get_config()
@@ -65,13 +58,10 @@ def main():
 
     # Log the configuration parameters
     _logger.info('Configuration parameters: {}'.format(vars(config)))    # Use vars to convert config to dict for logging
-    
-    if config.read_data:
-        file_path = '{}/real_data'.format(config.data_path)
-        solution_path = '{}/true_graph'.format(config.data_path)
-        training_set = DataGenerator_read_data(file_path, solution_path, config.normalize, config.transpose)
-    else:
-        raise ValueError("Only support importing data from existing files")
+
+    file_path = '{}/real_data'.format(config.data_path)
+    solution_path = '{}/true_graph'.format(config.data_path)
+    training_set = DataGenerator_read_data(file_path, solution_path, config.normalize, config.transpose)
         
     # set penalty weights
     score_type = config.score_type

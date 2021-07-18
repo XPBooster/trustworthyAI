@@ -31,7 +31,7 @@ class DataGenerator(object):
 
     def gen_instance_graph(self, max_length, dimension, test_mode=False):
         seq = np.random.randint(self.datasize, size=(dimension))
-        input_ = self.inputdata.iloc[seq,:]
+        input_ = self.inputdata[seq,:]
         return input_.T
 
     # Generate random batch for training procedure

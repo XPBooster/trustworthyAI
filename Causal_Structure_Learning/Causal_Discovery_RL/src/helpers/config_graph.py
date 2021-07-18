@@ -22,38 +22,35 @@ net_arg.add_argument('--encoder_type', type=str, default='TransformerEncoder', h
 net_arg.add_argument('--hidden_dim', type=int, default=64, help='actor LSTM num_neurons')
 net_arg.add_argument('--num_heads', type=int, default=16, help='actor input embedding')
 net_arg.add_argument('--num_stacks', type=int, default=6, help='actor LSTM num_neurons')
-net_arg.add_argument('--residual', action='store_true', help='whether to use residual for gat encoder')
+net_arg.add_argument('--residual', type=bool, default=True, help='whether to use residual for gat encoder')
 
 # Decoder
 net_arg.add_argument('--decoder_type', type=str, default='SingleLayerDecoder', help='type of decoder used')
 net_arg.add_argument('--decoder_activation', type=str, default='tanh',
                      help='activation for decoder')    # Choose from: 'tanh', 'relu', 'none'
 net_arg.add_argument('--decoder_hidden_dim', type=int, default=16, help='hidden dimension for decoder')
-net_arg.add_argument('--use_bias', action='store_true', help='Whether to add bias term when calculating decoder logits')
-net_arg.add_argument('--use_bias_constant', action='store_true', help='Whether to add bias term as CONSTANT when calculating decoder logits')
-net_arg.add_argument('--bias_initial_value', type=float, default=False,
-                     help='Initial value for bias term when calculating decoder logits')
+net_arg.add_argument('--use_bias', type=bool, default=True, help='Whether to add bias term when calculating decoder logits')
+net_arg.add_argument('--use_bias_constant', type=bool, default=True, help='Whether to add bias term as CONSTANT when calculating decoder logits')
+net_arg.add_argument('--bias_initial_value', type=float, default=False, help='Initial value for bias term when calculating decoder logits')
 
 # Data
 data_arg = add_argument_group('Data')
-data_arg.add_argument('--batch_size', type=int, default=64, help='batch size for training')
+data_arg.add_argument('--batch_size', type=int, default=512, help='batch size for training')
 data_arg.add_argument('--input_dimension', type=int, default=64, help='dimension of reshaped vector') # reshaped
 data_arg.add_argument('--max_length', type=int, default=55, help='number of variables')
 data_arg.add_argument('--data_size', type=int, default=3000, help='Number of observational samples')
 
 data_arg.add_argument('--read_data', type=bool, default=True, help='read existing_data or not')
 data_arg.add_argument('--data_path', type=str, default='Datasets', help='data path for read data')
-data_arg.add_argument('--normalize', action="store_true", help='whether the inputdata shall be normalized')
-data_arg.add_argument('--transpose', action="store_true", help='whether the true graph needs transposed')
+data_arg.add_argument('--normalize', type=bool, default=True, help='whether the inputdata shall be normalized')
+data_arg.add_argument('--transpose', type=bool, default=True, help='whether the true graph needs transposed')
 
 data_arg.add_argument('--score_type', type=str, default='BIC', help='score functions')
 data_arg.add_argument('--reg_type', type=str, default='LR', help='regressor type (in combination wth score_type)')
 data_arg.add_argument('--lambda_iter_num', type=int, default=1000, help='how often to update lambdas')
 #TODO: maybe add other weights adjustment strategy as an option
-data_arg.add_argument('--lambda_flag_default', action="store_true",
-                      help='with set lambda parameters; true with default strategy and ignore input bounds')
-data_arg.add_argument('score_bd_tight', action='store_true',
-                      help='if bound is tight, then simply use a fixed value, rather than the adaptive one')
+data_arg.add_argument('--lambda_flag_default', type=bool, default=True, help='with set lambda parameters; true with default strategy and ignore input bounds')
+data_arg.add_argument('--score_bd_tight', action='store_true', help='if bound is tight, then simply use a fixed value, rather than the adaptive one')
 data_arg.add_argument('--lambda1_update', type=float, default=1, help='increasing additive lambda1')
 data_arg.add_argument('--lambda2_update', type=float, default=10, help='increasing  multiplying lambda2')
 data_arg.add_argument('--score_lower', type=float, default=0.0, help='lower bound on lambda1')
@@ -77,7 +74,7 @@ train_arg.add_argument('--l1_graph_reg', type=float, default=0.0, help='L1 graph
 # Misc
 misc_arg = add_argument_group('User options') #####################################################
 
-misc_arg.add_argument('--inference_mode', type=str2bool, default=True, help='switch to inference mode when model is trained') 
+misc_arg.add_argument('--inference_mode', type=str2bool, default=True, help='switch to inference mode when model is trained')
 misc_arg.add_argument('--restore_model', type=str2bool, default=False, help='whether or not model is retrieved')
 
 misc_arg.add_argument('--save_to', type=str, default='20/model', help='saver sub directory')

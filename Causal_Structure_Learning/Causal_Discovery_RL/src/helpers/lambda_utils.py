@@ -6,11 +6,24 @@ from scipy.spatial.distance import pdist, squareform
 
 
 def BIC_input_graph(X, g, reg_type='LR', score_type='BIC'):
-    """cal BIC score for given graph"""
+
+    """
+
+    Parameters
+    ----------
+    X Input data
+    g Input graph
+    reg_type Regressor
+    score_type score function type
+
+    Returns The score of graph g given input data, reg_type and score_type
+    -------
+
+    """
 
     RSS_ls = []
 
-    n, d = X.shape 
+    m, n = X.shape
 
     if reg_type in ('LR', 'QR'):
         reg = LinearRegression()
@@ -19,7 +32,7 @@ def BIC_input_graph(X, g, reg_type='LR', score_type='BIC'):
 
     poly = PolynomialFeatures()
 
-    for i in range(d):
+    for i in range(n):
         y_ = X[:, [i]]
         inds_x = list(np.abs(g[i])>0.1)
 
@@ -42,17 +55,18 @@ def BIC_input_graph(X, g, reg_type='LR', score_type='BIC'):
             RSS_ls.append(RSSi)
 
     if score_type == 'BIC':
-        return np.log(np.sum(RSS_ls)/n+1e-8) 
+        return np.log(np.sum(RSS_ls)/m+1e-8)
     elif score_type == 'BIC_different_var':
-        return np.sum(np.log(np.array(RSS_ls)/n)+1e-8) 
+        return np.sum(np.log(np.array(RSS_ls)/m)+1e-8)
     
     
-def BIC_lambdas(X, gl=None, gu=None, gtrue=None, reg_type='LR', score_type='BIC'):
+def BIC_lambdas(X, g_l=None, g_u=None, g_true=None, reg_type='LR', score_type='BIC'):
+
     """
     :param X: dataset
-    :param gl: input graph to get score lower bound
-    :param gu: input graph to get score upper bound
-    :param gtrue: input true graph
+    :param g_l: input graph to get score lower bound
+    :param g_u: input graph to get score upper bound
+    :param g_true: input true graph
     :param reg_type:
     :param score_type:
     :return: score lower bound, score upper bound, true score (only for monitoring)
@@ -64,28 +78,20 @@ def BIC_lambdas(X, gl=None, gu=None, gtrue=None, reg_type='LR', score_type='BIC'
         bic_penalty = np.log(n) / (n*d)
     elif score_type == 'BIC_different_var':
         bic_penalty = np.log(n) / n
-    
-    # default gl for BIC score: complete graph (except digonals)
-    if gl is None:
-        g_ones= np.ones((d,d))
-        for i in range(d):
-            g_ones[i, i] = 0
-        gl = g_ones
 
-    # default gu for BIC score: empty graph
-    if gu is None:
-        gu = np.zeros((d, d))
+    g_l = np.ones(d)-np.eye(d) if g_l is None else g_l # default g_l for BIC score: complete graph except digonals
+    g_u = np.zeros((d, d)) if g_u is None else g_u # default g_u for BIC score: empty graph
 
-    sl = BIC_input_graph(X, gl, reg_type, score_type)
-    su = BIC_input_graph(X, gu, reg_type, score_type) 
+    s_l = BIC_input_graph(X, g_l, reg_type, score_type)
+    s_u = BIC_input_graph(X, g_u, reg_type, score_type) 
 
-    if gtrue is None:
-        strue = sl - 10
+    if g_true is None:
+        s_true = s_l - 10
     else:
-        print(BIC_input_graph(X, gtrue, reg_type, score_type))
-        print(gtrue)
+        print(BIC_input_graph(X, g_true, reg_type, score_type))
+        print(g_true)
         print(bic_penalty)
-        strue = BIC_input_graph(X, gtrue, reg_type, score_type) + np.sum(gtrue) * bic_penalty
+        s_true = BIC_input_graph(X, g_true, reg_type, score_type) + np.sum(g_true) * bic_penalty
     
-    return sl, su, strue
+    return s_l, s_u, s_true
 
