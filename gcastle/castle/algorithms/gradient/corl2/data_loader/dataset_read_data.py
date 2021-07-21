@@ -49,17 +49,17 @@ class DataGenerator(object):
                 gtrue_mask = np.transpose(gtrue_mask)
         self.true_graph_mask = np.int32(np.abs(gtrue_mask) > 1e-3)
 
-    def gen_instance_graph(self, max_length, dimension, test_mode=False):
+    def gen_instance_graph(self, num_nodes, dimension, test_mode=False):
         seq = np.random.randint(self.datasize, size=(dimension))
         input_ = self.inputdata[seq]
         return input_.T
 
     # Generate random batch for training procedure
-    def train_batch(self, batch_size, max_length, dimension):
+    def train_batch(self, batch_size, num_nodes, dimension):
         input_batch = []
 
         for _ in range(batch_size):
-            input_= self.gen_instance_graph(max_length, dimension)
+            input_= self.gen_instance_graph(num_nodes, dimension)
             input_batch.append(input_)
 
         return input_batch

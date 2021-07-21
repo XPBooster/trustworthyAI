@@ -83,7 +83,7 @@ class CORL1(BaseLearner):
                             .format(type(data)))
         
         config.data_size = X.shape[0]
-        config.max_length = X.shape[1]
+        config.num_nodes = X.shape[1]
 
         causal_matrix = self._rl(X, config)
         self.causal_matrix = causal_matrix
@@ -119,7 +119,7 @@ class CORL1(BaseLearner):
         reg_type = config.reg_type
 
         actor = Actor(config)
-        callreward = get_Reward(actor.batch_size, config.max_length, 
+        callreward = get_Reward(actor.batch_size, config.num_nodes, 
                                 config.parral, actor.input_dimension,
                                 input_data, score_type, reg_type, 
                                 config.gpr_alpha, config.med_w, 
@@ -150,7 +150,7 @@ class CORL1(BaseLearner):
                 # if i%1000 == 0 or i%1000 == 1:
                 #     logger.info('time log_3')
 
-                input_batch = training_set.train_batch(actor.batch_size, actor.max_length, actor.input_dimension)
+                input_batch = training_set.train_batch(actor.batch_size, actor.num_nodes, actor.input_dimension)
                 positions, i_list, s0_list, s1_list = sess.run([actor.positions, actor.i_list,
                         actor.s0_list, actor.s1_list],feed_dict={actor.input_: input_batch})
 
@@ -159,17 +159,17 @@ class CORL1(BaseLearner):
                 for m in range(positions.shape[0]):
                     zero_matrix = from_order_to_graph(positions[m])
 
-                    action_mask = np.zeros(actor.max_length)
+                    action_mask = np.zeros(actor.num_nodes)
                     for po in positions[m]:
                         action_mask_s.append(action_mask.copy())
-                        action_mask += np.eye(actor.max_length)[po]
+                        action_mask += np.eye(actor.num_nodes)[po]
 
                     samples.append(zero_matrix)
                     temp_sum = cover_rate(zero_matrix, training_set.true_graph.T)
                     if temp_sum > max_sum:
                         max_sum = temp_sum
                         if i == 1 or i % 500 == 0:
-                            logger.info('[iter {}] [Batch {}_th] The optimal nodes order cover true graph {}/{}!'.format(i,m,max_sum,actor.max_length*actor.max_length))
+                            logger.info('[iter {}] [Batch {}_th] The optimal nodes order cover true graph {}/{}!'.format(i,m,max_sum,actor.num_nodes*actor.num_nodes))
                 
                 # if i % 1000 == 0:
                 #     logger.info('time log_1')
@@ -207,8 +207,8 @@ class CORL1(BaseLearner):
                     actor.prev_state_0: s0_list.reshape((-1, actor.input_dimension)),
                     actor.prev_state_1: s1_list.reshape((-1, actor.input_dimension)),
                     actor.prev_input: i_list.reshape((-1, actor.input_dimension)),
-                    actor.position: positions.reshape(actor.batch_size*actor.max_length),
-                    actor.action_mask_: action_mask_s.reshape((-1,actor.max_length))}
+                    actor.position: positions.reshape(actor.batch_size*actor.num_nodes),
+                    actor.action_mask_: action_mask_s.reshape((-1,actor.num_nodes))}
 
                 soft_replacement, log_softmax, train_step1, loss1, loss2, train_step2 = \
                     sess.run([actor.soft_replacement, actor.log_softmax,

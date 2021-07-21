@@ -27,7 +27,7 @@ class Actor(object):
         self.config = config
         self.is_train = True
         self.batch_size = config.batch_size  # batch size
-        self.max_length = config.max_length
+        self.num_nodes = config.num_nodes
         self.input_dimension = config.input_dimension
 
         # Reward config
@@ -41,20 +41,20 @@ class Actor(object):
         self.global_step2 = tf.Variable(0, trainable=False, name="global_step2")  # global step
         self.lr2 = 0.001
 
-        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.input_dimension],
+        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.input_dimension],
                                      name="input_coordinates")
         self.reward_ = tf.placeholder(tf.float32, [self.batch_size], name='input_rewards')
-        self.input_true_order_ = tf.placeholder(tf.int32, [self.batch_size, self.max_length],
+        self.input_true_order_ = tf.placeholder(tf.int32, [self.batch_size, self.num_nodes],
                                                 name="input_order")
-        self.prev_state_0 = tf.placeholder(tf.float32, [self.max_length * self.batch_size, self.input_dimension],
+        self.prev_state_0 = tf.placeholder(tf.float32, [self.num_nodes * self.batch_size, self.input_dimension],
                                            name='prev_state')
-        self.prev_state_1 = tf.placeholder(tf.float32, [self.max_length * self.batch_size, self.input_dimension],
+        self.prev_state_1 = tf.placeholder(tf.float32, [self.num_nodes * self.batch_size, self.input_dimension],
                                            name='prev_state')
-        self.prev_input = tf.placeholder(tf.float32, [self.max_length * self.batch_size, self.input_dimension],
+        self.prev_input = tf.placeholder(tf.float32, [self.num_nodes * self.batch_size, self.input_dimension],
                                          name='prev_input')
-        self.position = tf.placeholder(tf.float32, [self.max_length * self.batch_size],
+        self.position = tf.placeholder(tf.float32, [self.num_nodes * self.batch_size],
                                        name='position')
-        self.action_mask_ = tf.placeholder(tf.float32, [self.max_length * self.batch_size, self.max_length],
+        self.action_mask_ = tf.placeholder(tf.float32, [self.num_nodes * self.batch_size, self.num_nodes],
                                            name='action_mask_')
 
         self.build_permutation()
@@ -87,7 +87,7 @@ class Actor(object):
             if self.config.decoder_type == 'PointerDecoder' or 'MLPDecoder':
                 self.positions, self.mask_scores, self.s0_list, self.s1_list, self.i_list = self.decoder.loop_decode()
                 log_softmax = self.decoder.decode_softmax(self.prev_state_0, self.prev_state_1, self.prev_input, self.position, self.action_mask_)
-                self.log_softmax_ = tf.transpose(tf.reshape(log_softmax, [self.batch_size, self.max_length]),[1,0])
+                self.log_softmax_ = tf.transpose(tf.reshape(log_softmax, [self.batch_size, self.num_nodes]),[1,0])
                 self.log_softmax = tf.reduce_sum(self.log_softmax_, 0)  # TODO:[Batch,]
                 assert self.log_softmax.shape == (self.batch_size,)
 

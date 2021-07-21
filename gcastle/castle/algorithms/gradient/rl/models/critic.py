@@ -25,7 +25,7 @@ class Critic(object):
 
         # Data config
         self.batch_size = config.batch_size 
-        self.max_length = config.max_length 
+        self.num_nodes = config.num_nodes 
         self.input_dimension = config.input_dimension 
 
         # Network config

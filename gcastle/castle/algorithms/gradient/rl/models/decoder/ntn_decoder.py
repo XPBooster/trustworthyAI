@@ -21,11 +21,11 @@ class NTNDecoder(object):
 
     def __init__(self, config, is_train):
         self.batch_size = config.batch_size    # batch size
-        self.max_length = config.max_length    # input sequence length (number of cities)
+        self.num_nodes = config.num_nodes    # input sequence length (number of cities)
         self.input_dimension = config.hidden_dim
         self.input_embed = config.hidden_dim    # dimension of embedding space (actor)
-        self.max_length = config.max_length
-        self.decoder_hidden_dim = config.decoder_hidden_dim
+        self.num_nodes = config.num_nodes
+        self.decoder_d_model = config.decoder_d_model
         self.initializer = tf.contrib.layers.xavier_initializer() # variables initializer
         self.decoder_activation = config.decoder_activation
         self.use_bias = config.use_bias
@@ -39,25 +39,25 @@ class NTNDecoder(object):
         self.entropy = []
 
     def decode(self, encoder_output):
-        # encoder_output is a tensor of size [batch_size, max_length, input_embed]
+        # encoder_output is a tensor of size [batch_size, num_nodes, input_embed]
         with tf.variable_scope('ntn'):
-            W = tf.get_variable('bilinear_weights', [self.input_embed, self.input_embed, self.decoder_hidden_dim],
+            W = tf.get_variable('bilinear_weights', [self.input_embed, self.input_embed, self.decoder_d_model],
                                 initializer=self.initializer)
-            W_l = tf.get_variable('weights_left', [self.input_embed, self.decoder_hidden_dim],
+            W_l = tf.get_variable('weights_left', [self.input_embed, self.decoder_d_model],
                                   initializer=self.initializer)
-            W_r = tf.get_variable('weights_right', [self.input_embed, self.decoder_hidden_dim],
+            W_r = tf.get_variable('weights_right', [self.input_embed, self.decoder_d_model],
                                   initializer=self.initializer)
-            U = tf.get_variable('U', [self.decoder_hidden_dim], initializer=self.initializer)
-            B = tf.get_variable('bias', [self.decoder_hidden_dim], initializer=self.initializer)
+            U = tf.get_variable('U', [self.decoder_d_model], initializer=self.initializer)
+            B = tf.get_variable('bias', [self.decoder_d_model], initializer=self.initializer)
 
-        # Compute linear output with shape (batch_size, max_length, max_length, decoder_hidden_dim)
+        # Compute linear output with shape (batch_size, num_nodes, num_nodes, decoder_d_model)
         dot_l = tf.einsum('ijk, kl->ijl', encoder_output, W_l)
         dot_r = tf.einsum('ijk, kl->ijl', encoder_output, W_r)
-        tiled_l = tf.tile(tf.expand_dims(dot_l, axis=2), (1, 1, self.max_length, 1))
-        tiled_r = tf.tile(tf.expand_dims(dot_r, axis=1), (1, self.max_length, 1, 1))
+        tiled_l = tf.tile(tf.expand_dims(dot_l, axis=2), (1, 1, self.num_nodes, 1))
+        tiled_r = tf.tile(tf.expand_dims(dot_r, axis=1), (1, self.num_nodes, 1, 1))
         linear_sum = tiled_l + tiled_r
 
-        # Compute bilinear product with shape (batch_size, max_length, max_length, decoder_hidden_dim)
+        # Compute bilinear product with shape (batch_size, num_nodes, num_nodes, decoder_d_model)
         bilinear_product = tf.einsum('ijk, knl, imn->ijml', encoder_output, W, encoder_output)
 
         if self.decoder_activation == 'tanh':    # Original implementation by paper
@@ -83,12 +83,12 @@ class NTNDecoder(object):
 
         self.adj_prob = logits
 
-        for i in range(self.max_length):
+        for i in range(self.num_nodes):
             position = tf.ones([encoder_output.shape[0]]) * i
             position = tf.cast(position, tf.int32)
 
             # Update mask
-            self.mask = tf.one_hot(position, self.max_length)
+            self.mask = tf.one_hot(position, self.num_nodes)
 
             masked_score = self.adj_prob[:,i,:] - 100000000.*self.mask
             prob = distr.Bernoulli(masked_score)    # probs input probability, logit input log_probability

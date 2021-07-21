@@ -31,7 +31,7 @@ from castle.algorithms import PC
 
 
 # simulation for pc
-weighted_random_dag = DAG.erdos_renyi(n_nodes=5, n_edges=10, weight_range=(0.5, 2.0), seed=1)
+weighted_random_dag = DAG.erdos_renyi(num_nodess=5, n_edges=10, weight_range=(0.5, 2.0), seed=1)
 dataset = IIDSimulation(W=weighted_random_dag, n=2000, method='linear', sem_type='gauss')
 true_dag, X = dataset.B, dataset.X
 

@@ -90,13 +90,13 @@ class TransformerDecoder(object):
  
     def __init__(self, config, is_train):
         self.batch_size = config.batch_size # batch size
-        self.max_length = config.max_length # input sequence length (number of cities)
+        self.num_nodes = config.num_nodes # input sequence length (number of cities)
         self.input_dimension = config.hidden_dim#input_dimension*2+1 # dimension of input, multiply 2 for expanding dimension to input complex value to tf, add 1 high priority token, 1 pointing
  
         self.input_embed = config.hidden_dim # dimension of embedding space (actor)
         self.num_heads = config.num_heads
         self.num_stacks = config.num_stacks
-        self.max_length = config.max_length
+        self.num_nodes = config.num_nodes
  
         self.initializer = tf.contrib.layers.xavier_initializer() # variables initializer
         self.is_training = is_train
@@ -113,7 +113,7 @@ class TransformerDecoder(object):
     def decode(self, inputs):
  
         # Tensor blocks holding the input sequences [Batch Size, Sequence Length, Features]
-        # self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.input_dimension], name="input_raw")
+        # self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.input_dimension], name="input_raw")
  
         # with tf.variable_scope("embedding_MCS"):
         #   # Embed input sequence
@@ -126,7 +126,7 @@ class TransformerDecoder(object):
 
         all_user_embedding = tf.reduce_mean(inputs, 1)
         inputs_with_all_user_embedding = tf.concat([inputs,
-                                        tf.tile(tf.expand_dims(all_user_embedding,1), [1, self.max_length ,1])], -1)
+                                        tf.tile(tf.expand_dims(all_user_embedding,1), [1, self.num_nodes ,1])], -1)
  
         with tf.variable_scope("embedding_MCS"):
           # Embed input sequence
@@ -148,13 +148,13 @@ class TransformerDecoder(object):
           # Return the output activations [Batch size, Sequence Length, Num_neurons] as tensors.
           # self.encoder_output = self.enc ### NOTE: encoder_output is the ref for attention ###
           # Readout layer
-          params = {"inputs": self.enc, "filters": self.max_length, "kernel_size": 1, "activation": None, "use_bias": True}
+          params = {"inputs": self.enc, "filters": self.num_nodes, "kernel_size": 1, "activation": None, "use_bias": True}
 
 
           self.adj_prob = tf.layers.conv1d(**params)
 
 
-          for i in range(self.max_length):
+          for i in range(self.num_nodes):
               # Multinomial distribution
               # prob_test = tf.convert_to_tensor(np.array([[0,0.9,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] for i in range(32)]), dtype = tf.float32)
               # prob_test = tf.Print(prob_test, ['prob_test  value is', prob_test], summarize=100)
@@ -163,7 +163,7 @@ class TransformerDecoder(object):
             position = tf.cast(position, tf.int32)
 
             # Update mask
-            self.mask = tf.one_hot(position, self.max_length)
+            self.mask = tf.one_hot(position, self.num_nodes)
 
 
             masked_score = self.adj_prob[:,i,:] - 100000000.*self.mask

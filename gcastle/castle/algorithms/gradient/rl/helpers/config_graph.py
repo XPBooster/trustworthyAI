@@ -42,7 +42,7 @@ net_arg.add_argument('--residual', action='store_true', help='whether to use res
 net_arg.add_argument('--decoder_type', type=str, default='SingleLayerDecoder', help='type of decoder used')
 net_arg.add_argument('--decoder_activation', type=str, default='tanh',
                      help='activation for decoder')    # Choose from: 'tanh', 'relu', 'none'
-net_arg.add_argument('--decoder_hidden_dim', type=int, default=16, help='hidden dimension for decoder')
+net_arg.add_argument('--decoder_d_model', type=int, default=16, help='hidden dimension for decoder')
 net_arg.add_argument('--use_bias', action='store_true', help='Whether to add bias term when calculating decoder logits')
 net_arg.add_argument('--use_bias_constant', action='store_true', help='Whether to add bias term as CONSTANT when calculating decoder logits')
 net_arg.add_argument('--bias_initial_value', type=float, default=False,

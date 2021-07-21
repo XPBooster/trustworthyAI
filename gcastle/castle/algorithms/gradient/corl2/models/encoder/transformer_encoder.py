@@ -87,7 +87,7 @@ class TransformerEncoder(object):
  
     def __init__(self, config, is_train):
         self.batch_size = config.batch_size # batch size
-        self.max_length = config.max_length # input sequence length (number of cities)
+        self.num_nodes = config.num_nodes # input sequence length (number of cities)
         self.input_dimension = config.input_dimension # dimension of input, multiply 2 for expanding dimension to input complex value to tf, add 1 token
  
         self.input_embed = config.hidden_dim # dimension of embedding space (actor)
@@ -101,7 +101,7 @@ class TransformerEncoder(object):
     def encode(self, inputs):
  
         # Tensor blocks holding the input sequences [Batch Size, Sequence Length, Features]
-        # self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.input_dimension], name="input_raw")
+        # self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.input_dimension], name="input_raw")
         with tf.variable_scope("embedding"):
           # Embed input sequence
           W_embed =tf.get_variable("weights",[1,self.input_dimension, self.input_embed], initializer=self.initializer)

@@ -1,31 +1,40 @@
 import sys
 import logging
 from datetime import datetime
+
+import torch
 from pytz import timezone, utc
-from visualdl import LogWriter
-import os.path as osp
-import time
-class VisualLogger():
+import neptune.new as neptune
 
-    def __init__(self, log_dir='./log'):
+class ResultWriter():
 
-        self.log_dir = osp.join(log_dir, time.strftime("%Y%m%d%H%M%S", time.localtime()))
-        self.writer = LogWriter(logdir=osp.join(self.log_dir))
+    def __init__(self, project=None, api_token=None, log_dir=None, verbose=False):
+        """
 
-    def hparams(self, hparams_dict, metrics_list):
+        Parameters
+        ----------
+        project: default None, the project id in Naptune project
+        api_token: default None, the api_token in Naptune project
+        log_dir: default None, the local log directory
+        verbose: default False, if true then Naptune monitors the experiment
+        """
+        self.verbose = verbose
+        if self.verbose == True:
 
-        self.writer.add_hparams(hparams_dict=hparams_dict, metrics_list=metrics_list)
+            self.writer = neptune.init(project=project, api_token=api_token)  # your credentials
 
-    def scalar(self, tag, step, value):
+    def add_scalar(self, tag, value):
 
-        assert type(step) is int
-        assert type(tag) is str
-        assert type(value) is float or int
-        self.writer.add_scalar(tag=tag, value=value, step=step)
+        if type(value) is torch.Tensor:
+            value = value.detach().numpy()
+        if self.verbose == True:
+            self.writer[tag].log(value)
 
-    def close(self):
+    def add_hparam(self, hparam_dict):
 
-        self.writer.close()
+        if self.verbose == True:
+
+            self.writer['parameters'] = hparam_dict
 
 class LogHelper(object):
     log_format = '%(asctime)s %(levelname)s - %(name)s - %(message)s'

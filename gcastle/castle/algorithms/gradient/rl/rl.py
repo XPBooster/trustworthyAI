@@ -95,7 +95,7 @@ class RL(BaseLearner):
                             .format(type(data)))
         
         config.data_size = X.shape[0]
-        config.max_length = X.shape[1]
+        config.num_nodes = X.shape[1]
 
         causal_matrix = self._rl(X, config)
         self.causal_matrix = causal_matrix
@@ -123,7 +123,7 @@ class RL(BaseLearner):
             lambda1 = 0
             lambda1_upper = 5
             lambda1_update_add = 1
-            lambda2 = 1/(10**(np.round(config.max_length/3)))
+            lambda2 = 1/(10**(np.round(config.num_nodes/3)))
             lambda2_upper = 0.01
             lambda2_update_mul = 10
             lambda_iter_num = config.lambda_iter_num
@@ -144,14 +144,14 @@ class RL(BaseLearner):
                 lambda1 = 0
                 lambda1_upper = 5
                 lambda1_update_add = 1
-            lambda2 = 1/(10**(np.round(config.max_length/3)))
+            lambda2 = 1/(10**(np.round(config.num_nodes/3)))
             lambda2_upper = 0.01
             lambda2_update_mul = config.lambda2_update
             lambda_iter_num = config.lambda_iter_num
 
         # actor
         actor = Actor(config)
-        callreward = get_Reward(actor.batch_size, config.max_length, 
+        callreward = get_Reward(actor.batch_size, config.num_nodes, 
                                 actor.input_dimension, training_set.inputdata,
                                 sl, su, lambda1_upper, score_type, reg_type, 
                                 config.l1_graph_reg, False)
@@ -189,7 +189,7 @@ class RL(BaseLearner):
                 if config.verbose:
                     logging.info('Start training for {}-th epoch'.format(i))
 
-                input_batch = training_set.train_batch(actor.batch_size, actor.max_length, actor.input_dimension)
+                input_batch = training_set.train_batch(actor.batch_size, actor.num_nodes, actor.input_dimension)
                 graphs_feed = sess.run(actor.graphs, feed_dict={actor.input_: input_batch})
                 reward_feed = callreward.cal_rewards(graphs_feed, lambda1, lambda2)
 

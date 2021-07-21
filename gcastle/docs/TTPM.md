@@ -66,8 +66,8 @@
   
   
   # 生成模拟数据
-  true_causal_matrix = DAG.erdos_renyi(n_nodes=10, n_edges=10)
-  topology_matrix = Topology.erdos_renyi(n_nodes=20, n_edges=20)
+  true_causal_matrix = DAG.erdos_renyi(num_nodess=10, n_edges=10)
+  topology_matrix = Topology.erdos_renyi(num_nodess=20, n_edges=20)
   simulator = THPSimulation(true_causal_matrix, topology_matrix,
                             mu_range=(0.00005, 0.0001),
                             alpha_range=(0.005, 0.007))

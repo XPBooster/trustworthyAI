@@ -52,7 +52,7 @@ from the released training log, please file an issue to let us know.
 * We open source three synthetic datasets that were used in our experiments. The Sachs dataset 
 belongs to the authors, so please download the dataset by yourself 
 (we do release the training_logs with this dataset).
-* Codes for synthetic dataset generation are available [here](src/Datasets). The used datasets and training logs in the paper can be found [here](https://github.com/zhushy/causal-datasets/tree/master/Causal_Discovery_RL).
+* Codes for synthetic dataset generation are available [here](Datasets). The used datasets and training logs in the paper can be found [here](https://github.com/zhushy/causal-datasets/tree/master/Causal_Discovery_RL).
 Jupyter notebooks are also provided to illustrate the experiment results.
 * You may need to install the rpy2 package when CAM pruning is used. Otherwise, simply comment the CAM pruning import codes.
 
@@ -61,7 +61,7 @@ Jupyter notebooks are also provided to illustrate the experiment results.
 ```
 # exp1: RL-BIC2, assuming the equal noise variances
 cd src
-python main.py  --max_length 12 \
+python main.py  --num_nodes 12 \
                 --data_size 5000 \
                 --score_type BIC \
                 --reg_type LR \
@@ -75,7 +75,7 @@ python main.py  --max_length 12 \
 ```
 ```
 # exp1: RL-BIC, assuming different noise variances
-python main.py  --max_length 12 \
+python main.py  --num_nodes 12 \
                 --data_size 5000 \
                 --score_type BIC_different_var \
                 --reg_type LR \
@@ -89,7 +89,7 @@ python main.py  --max_length 12 \
 ```
 ```            
 # exp1: 30 nodes
-python main.py  --max_length 30 \
+python main.py  --num_nodes 30 \
                 --data_size 5000 \
                 --score_type BIC \
                 --reg_type LR \
@@ -108,7 +108,7 @@ python main.py  --max_length 30 \
 # exp supp: different decoders
 # default decoder_type=SingleLayerDecoder; 
 # others: TransformerDecoder, BilinearDecoder, NTNDecoder
-python main.py --max_length 12 \
+python main.py --num_nodes 12 \
                 --data_size 5000 \
                 --score_type BIC \
                 --reg_type LR \
@@ -125,7 +125,7 @@ python main.py --max_length 12 \
 # exp2: quad with RL-BIC2
 # note: data has been processed, with first 3000 samples (out of 5000 sampels generated)
 #       according to sample L2 norms
-python main.py --max_length 10 \
+python main.py --num_nodes 10 \
                 --data_size 3000 \
                 --score_type BIC \
                 --reg_type QR \
@@ -139,7 +139,7 @@ python main.py --max_length 10 \
 ```
 ```                   
 # exp3: GPR
-python main.py --max_length 10 \
+python main.py --num_nodes 10 \
                 --data_size 1000 \
                 --score_type BIC \
                 --reg_type GPR \
@@ -153,7 +153,7 @@ python main.py --max_length 10 \
 ```
 ```   
 # exp4: sachs
-python main.py --max_length 11 \
+python main.py --num_nodes 11 \
                 --data_size 853 \
                 --score_type BIC \
                 --reg_type GPR \

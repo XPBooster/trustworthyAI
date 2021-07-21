@@ -12,12 +12,12 @@ class Critic(object):
 
         # Data config
         self.batch_size = config.batch_size 
-        self.max_length = config.max_length 
+        self.num_nodes = config.num_nodes 
         self.input_dimension = config.input_dimension 
 
         # Network config
-        self.input_embed = config.hidden_dim 
-        self.num_neurons = config.hidden_dim 
+        self.input_embed = config.d_model
+        self.num_neurons = config.d_model
         self.initializer = tf.contrib.layers.xavier_initializer() 
 
         # Baseline setup

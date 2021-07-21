@@ -21,10 +21,10 @@ class BilinearDecoder(object):
 
     def __init__(self, config, is_train):
         self.batch_size = config.batch_size    # batch size
-        self.max_length = config.max_length    # input sequence length (number of cities)
+        self.num_nodes = config.num_nodes    # input sequence length (number of cities)
         self.input_dimension = config.hidden_dim
         self.input_embed = config.hidden_dim    # dimension of embedding space (actor)
-        self.max_length = config.max_length
+        self.num_nodes = config.num_nodes
         self.initializer = tf.contrib.layers.xavier_initializer() # variables initializer
         self.use_bias = config.use_bias
         self.bias_initial_value = config.bias_initial_value
@@ -37,7 +37,7 @@ class BilinearDecoder(object):
         self.entropy = []
 
     def decode(self, encoder_output):
-        # encoder_output is a tensor of size [batch_size, max_length, input_embed]
+        # encoder_output is a tensor of size [batch_size, num_nodes, input_embed]
         with tf.variable_scope('bilinear'):
             W = tf.get_variable('bilinear_weights', [self.input_embed, self.input_embed], initializer=self.initializer)
 
@@ -55,12 +55,12 @@ class BilinearDecoder(object):
 
         self.adj_prob = logits
 
-        for i in range(self.max_length):
+        for i in range(self.num_nodes):
             position = tf.ones([encoder_output.shape[0]]) * i
             position = tf.cast(position, tf.int32)
 
             # Update mask
-            self.mask = tf.one_hot(position, self.max_length)
+            self.mask = tf.one_hot(position, self.num_nodes)
 
             masked_score = self.adj_prob[:,i,:] - 100000000.*self.mask
             prob = distr.Bernoulli(masked_score)    # probs input probability, logit input log_probability

@@ -11,7 +11,7 @@ model_params:
 
   decoder_type: 'SingleLayerDecoder' # type of decoder used
   decoder_activation: 'tanh' # activation for decoder
-  decoder_hidden_dim: 16 # hidden dimension for decoder
+  decoder_d_model: 16 # hidden dimension for decoder
   use_bias: True # Whether to add bias term when calculating decoder logits
   use_bias_constant: True # Whether to add bias term as CONSTANT when calculating decoder logits
   bias_initial_value: False # Initial value for bias term when calculating decoder logits

@@ -36,7 +36,7 @@ from castle.algorithms import NotearsLowRank
 # notears-low-rank used simulate data
 #######################################
 # simulate data for notears-low-rank
-weighted_random_dag = DAG.low_rank(n_nodes=10, degree=2, rank=5, weight_range=(0.5, 2.0), seed=1)
+weighted_random_dag = DAG.low_rank(num_nodess=10, degree=2, rank=5, weight_range=(0.5, 2.0), seed=1)
 dataset = IIDSimulation(W=weighted_random_dag, n=2000, method='linear', sem_type='gauss')
 true_dag, X = dataset.B, dataset.X
 

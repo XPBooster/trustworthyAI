@@ -124,24 +124,22 @@ class EncoderLayer(nn.Module):
 
 class TransformerEncoder(nn.Module):
 
-    def __init__(self, n_stack, d_in, d_model, d_hidden, n_head=8):
+    def __init__(self, config, is_train=True):
 
         super(TransformerEncoder, self).__init__()
-        self.block = EncoderLayer(d_model, d_hidden, n_head)
-        self.blocks = nn.ModuleList([copy.deepcopy(self.block) for _ in range(n_stack)])
-        self.norm = nn.LayerNorm(d_model)
-        self.w_1 = nn.Conv1d(d_in, d_model, 1)  # position-wise
+        block = EncoderLayer(config.d_model, config.d_model_attn, config.num_heads)
+        self.blocks = nn.ModuleList([copy.deepcopy(block) for _ in range(config.num_stacks)])
+        self.norm = nn.LayerNorm(config.d_model)
+        self.w_1 = nn.Conv1d(config.input_dimension, config.d_model, 1)  # position-wise
 
     def forward(self, x, mask=None):
 
-        x = torch.tensor(x, dtype=torch.float32)
+        x = x.type(dtype=torch.float32)
         output = x.transpose(2, 1)
         output = self.w_1(output)
         output = output.transpose(2, 1)
         for block in self.blocks:
             output = block(output, mask)
-        # output = output.transpose(2, 1)
         output = self.norm(output)
-        # output = output.transpose(2, 1)
 
         return output

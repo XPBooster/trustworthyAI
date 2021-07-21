@@ -159,45 +159,45 @@ class DAG(object):
         return B
 
     @staticmethod
-    def erdos_renyi(n_nodes, n_edges, weight_range=None, seed=None):
+    def erdos_renyi(num_nodess, n_edges, weight_range=None, seed=None):
 
-        assert n_nodes > 0
+        assert num_nodess > 0
         set_random_seed(seed)
         # Erdos-Renyi
-        creation_prob = (2 * n_edges) / (n_nodes ** 2)
-        G_und = nx.erdos_renyi_graph(n=n_nodes, p=creation_prob, seed=seed)
+        creation_prob = (2 * n_edges) / (num_nodess ** 2)
+        G_und = nx.erdos_renyi_graph(n=num_nodess, p=creation_prob, seed=seed)
         B_und = DAG._graph_to_adjmat(G_und)
         B = DAG._random_acyclic_orientation(B_und)
         if weight_range is None:
             return B
         else:
-            W = DAG._BtoW(B, n_nodes, weight_range)
+            W = DAG._BtoW(B, num_nodess, weight_range)
         return W
 
     @staticmethod
-    def scale_free(n_nodes, n_edges, weight_range=None, seed=None):
+    def scale_free(num_nodess, n_edges, weight_range=None, seed=None):
 
-        assert (n_nodes > 0 and n_edges >= n_nodes and n_edges < n_nodes * n_nodes)
+        assert (num_nodess > 0 and n_edges >= num_nodess and n_edges < num_nodess * num_nodess)
         set_random_seed(seed)
         # Scale-free, Barabasi-Albert
-        m = int(round(n_edges / n_nodes))
-        G_und = nx.barabasi_albert_graph(n=n_nodes, m=m)
+        m = int(round(n_edges / num_nodess))
+        G_und = nx.barabasi_albert_graph(n=num_nodess, m=m)
         B_und = DAG._graph_to_adjmat(G_und)
         B = DAG._random_acyclic_orientation(B_und)
         if weight_range is None:
             return B
         else:
-            W = DAG._BtoW(B, n_nodes, weight_range)
+            W = DAG._BtoW(B, num_nodess, weight_range)
         return W
 
     @staticmethod
-    def bipartite(n_nodes, n_edges, split_ratio = 0.2, weight_range=None, seed=None):
+    def bipartite(num_nodess, n_edges, split_ratio = 0.2, weight_range=None, seed=None):
 
-        assert n_nodes > 0
+        assert num_nodess > 0
         set_random_seed(seed)
         # Bipartite, Sec 4.1 of (Gu, Fu, Zhou, 2018)
-        n_top = int(split_ratio * n_nodes)
-        n_bottom = n_nodes -  n_top
+        n_top = int(split_ratio * num_nodess)
+        n_bottom = num_nodess -  n_top
         creation_prob = n_edges/(n_top*n_bottom)
         G_und = bipartite.random_graph(n_top, n_bottom, p=creation_prob, directed=True)
         B_und = DAG._graph_to_adjmat(G_und)
@@ -205,37 +205,37 @@ class DAG(object):
         if weight_range is None:
             return B
         else:
-            W = DAG._BtoW(B, n_nodes, weight_range)
+            W = DAG._BtoW(B, num_nodess, weight_range)
         return W
 
     @staticmethod
-    def hierarchical(n_nodes, degree=5, graph_level=5, weight_range=None, seed=None):
+    def hierarchical(num_nodess, degree=5, graph_level=5, weight_range=None, seed=None):
 
-        assert n_nodes > 1
+        assert num_nodess > 1
         set_random_seed(seed)
-        prob = float(degree) / (n_nodes - 1)
-        B = np.tril((np.random.rand(n_nodes, n_nodes) < prob).astype(float), k=-1)
-        point = sample(range(n_nodes - 1), graph_level - 1)
+        prob = float(degree) / (num_nodess - 1)
+        B = np.tril((np.random.rand(num_nodess, num_nodess) < prob).astype(float), k=-1)
+        point = sample(range(num_nodess - 1), graph_level - 1)
         point.sort()
-        point = [0] + [x + 1 for x in point] + [n_nodes]
+        point = [0] + [x + 1 for x in point] + [num_nodess]
         for i in range(graph_level):
             B[point[i]:point[i + 1], point[i]:point[i + 1]] = 0
         if weight_range is None:
             return B
         else:
-            W = DAG._BtoW(B, n_nodes, weight_range)
+            W = DAG._BtoW(B, num_nodess, weight_range)
         return W
 
     @staticmethod
-    def low_rank(n_nodes, degree=1, rank=5, weight_range=None, seed=None):
+    def low_rank(num_nodess, degree=1, rank=5, weight_range=None, seed=None):
 
-        assert n_nodes > 0
+        assert num_nodess > 0
         set_random_seed(seed)
-        B = DAG._low_rank_dag(n_nodes, degree, rank)
+        B = DAG._low_rank_dag(num_nodess, degree, rank)
         if weight_range is None:
             return B
         else:
-            W = DAG._BtoW(B, n_nodes, weight_range)
+            W = DAG._BtoW(B, num_nodess, weight_range)
         return W
 
 
@@ -538,13 +538,13 @@ class Topology(object):
     """
 
     @staticmethod
-    def erdos_renyi(n_nodes, n_edges, seed=None):
+    def erdos_renyi(num_nodess, n_edges, seed=None):
         """
         Generate topology matrix
 
         Parameters
         ----------
-        n_nodes : int, greater than 0
+        num_nodess : int, greater than 0
             The number of nodes.
         n_edges : int, greater than 0
             Use to calculate probability for edge creation.
@@ -555,9 +555,9 @@ class Topology(object):
         -------
         B: np.matrix
         """
-        assert n_nodes > 0, 'The number of nodes must be greater than 0.'
-        creation_prob = (2*n_edges)/(n_nodes**2)
-        G = nx.erdos_renyi_graph(n=n_nodes, p=creation_prob, seed=seed)
+        assert num_nodess > 0, 'The number of nodes must be greater than 0.'
+        creation_prob = (2*n_edges)/(num_nodess**2)
+        G = nx.erdos_renyi_graph(n=num_nodess, p=creation_prob, seed=seed)
         B = nx.to_numpy_matrix(G)
         return B
 

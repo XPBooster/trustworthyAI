@@ -19,7 +19,7 @@ import tensorflow as tf
 class Null(object):
     def __init__(self, config, is_train):
         self.batch_size = config.batch_size  # batch size
-        self.max_length = config.max_length  # input sequence length (number of cities)
+        self.num_nodes = config.num_nodes  # input sequence length (number of cities)
         self.input_dimension = config.input_dimension  # dimension of input, multiply 2 for expanding dimension to input complex value to tf, add 1 token
         self.input_embed = config.hidden_dim  # dimension of embedding space (actor)
         self.initializer = tf.contrib.layers.xavier_initializer()  # variables initializer

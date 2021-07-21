@@ -2,9 +2,9 @@ import logging
 import tensorflow as tf
 import numpy as np
 
-from .encoder import TransformerEncoder, GATEncoder
-from .decoder import TransformerDecoder, SingleLayerDecoder, BilinearDecoder, NTNDecoder
-from .critic import Critic
+from Causal_Structure_Learning.Causal_Discovery_RL.models.encoder import TransformerEncoder, GATEncoder
+from Causal_Structure_Learning.Causal_Discovery_RL.models.decoder import TransformerDecoder, SingleLayerDecoder, BilinearDecoder, NTNDecoder
+from Causal_Structure_Learning.Causal_Discovery_RL.models.critic import Critic
 
 
 # Tensor summaries for TensorBoard visualization
@@ -28,7 +28,7 @@ class Actor(object):
         self.is_train = True
         # Data config
         self.batch_size = config.batch_size  # batch size
-        self.max_length = config.max_length  
+        self.num_nodes = config.num_nodes  
         self.input_dimension = config.input_dimension  
 
         # Reward config
@@ -49,10 +49,9 @@ class Actor(object):
         self.lr2_decay_step = config.lr1_decay_step  # learning rate decay step
 
         # Tensor block holding the input sequences [Batch Size, Sequence Length, Features]
-        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.input_dimension],
-                                     name="input_coordinates")
+        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.input_dimension], name="input_coordinates")
         self.reward_ = tf.placeholder(tf.float32, [self.batch_size], name='input_rewards')
-        self.graphs_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.max_length], name='input_graphs')
+        self.graphs_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.num_nodes], name='input_graphs')
 
         self.build_permutation()
         self.build_critic()
@@ -87,13 +86,12 @@ class Actor(object):
             # self.samples is seq_lenthg * batch size * seq_length
             # cal cross entropy loss * reward
             graphs_gen = tf.transpose(tf.stack(self.samples), [1,0,2])
-
             self.graphs = graphs_gen
             self.graph_batch = tf.reduce_mean(graphs_gen, axis=0)
-            logits_for_rewards = tf.stack(self.scores)
-            entropy_for_rewards = tf.stack(self.entropy)
-            entropy_for_rewards = tf.transpose(entropy_for_rewards, [1, 0, 2])
-            logits_for_rewards = tf.transpose(logits_for_rewards, [1, 0, 2])
+
+            logits_for_rewards = tf.transpose(tf.stack(self.scores), [1, 0, 2])
+            entropy_for_rewards = tf.transpose(tf.stack(self.entropy), [1, 0, 2])
+
             self.test_scores = tf.sigmoid(logits_for_rewards)[:2]
             log_probss = tf.nn.sigmoid_cross_entropy_with_logits(labels=self.graphs_, logits=logits_for_rewards)
             self.log_softmax = tf.reduce_mean(log_probss, axis=[1, 2])
@@ -113,7 +111,6 @@ class Actor(object):
         with tf.name_scope('environment'):
             self.reward = self.reward_
             variable_summaries('reward', self.reward, with_max_min=True)
-
 
     def build_optim(self):
         # Update moving_mean and moving_variance for batch normalization layers

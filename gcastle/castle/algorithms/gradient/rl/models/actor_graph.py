@@ -43,7 +43,7 @@ class Actor(object):
         self.is_train = True
         # Data config
         self.batch_size = config.batch_size  # batch size
-        self.max_length = config.max_length  
+        self.num_nodes = config.num_nodes  
         self.input_dimension = config.input_dimension  
 
         # Reward config
@@ -64,10 +64,10 @@ class Actor(object):
         self.lr2_decay_step = config.lr1_decay_step  # learning rate decay step
 
         # Tensor block holding the input sequences [Batch Size, Sequence Length, Features]
-        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.input_dimension],
+        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.input_dimension],
                                      name="input_coordinates")
         self.reward_ = tf.placeholder(tf.float32, [self.batch_size], name='input_rewards')
-        self.graphs_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.max_length], name='input_graphs')
+        self.graphs_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.num_nodes], name='input_graphs')
 
         self.build_permutation()
         self.build_critic()

@@ -39,7 +39,7 @@ class GATEncoder(object):
  
     def __init__(self, config, is_train):
         self.batch_size = config.batch_size # batch size
-        self.max_length = config.max_length # input sequence length (number of cities)
+        self.num_nodes = config.num_nodes # input sequence length (number of cities)
         self.input_dimension = config.input_dimension # dimension of input, multiply 2 for expanding dimension to input complex value to tf, add 1 token
  
         self.hidden_dim = config.hidden_dim # dimension of embedding space (actor)
@@ -53,8 +53,8 @@ class GATEncoder(object):
 
     def encode(self, inputs):
         """
-        input shape: (batch_size, max_length, input_dimension)
-        output shape: (batch_size, max_length, input_embed)
+        input shape: (batch_size, num_nodes, input_dimension)
+        output shape: (batch_size, num_nodes, input_embed)
         """
         # First stack
         head_hidden_dim = self.hidden_dim / self.num_heads

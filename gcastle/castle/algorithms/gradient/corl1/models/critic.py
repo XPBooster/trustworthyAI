@@ -21,7 +21,7 @@ class Critic(object):
     def __init__(self, config, is_train):
         self.config=config
         self.batch_size = config.batch_size 
-        self.max_length = config.max_length
+        self.num_nodes = config.num_nodes
 
         self.num_neurons = config.hidden_dim 
         self.initializer = tf.contrib.layers.xavier_initializer() 

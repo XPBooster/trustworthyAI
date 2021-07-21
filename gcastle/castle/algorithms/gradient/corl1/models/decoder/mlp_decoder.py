@@ -26,7 +26,7 @@ class Mlp_decoder(object):
 
     def __init__(self, encoder_output, config, input_true_order_):
         self.batch_size = config.batch_size    # batch size
-        self.max_length = config.max_length
+        self.num_nodes = config.num_nodes
         self.initializer = tf.contrib.layers.xavier_initializer() # variables initializer
         self.use_bias = config.use_bias
 

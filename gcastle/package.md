@@ -62,7 +62,7 @@ from castle.datasets import IIDSimulation, DAG
 from castle.algorithms import PC
 
 # data simulation, simulate true causal dag and train_data.
-weighted_random_dag = DAG.erdos_renyi(n_nodes=10, n_edges=10,
+weighted_random_dag = DAG.erdos_renyi(num_nodess=10, n_edges=10,
                                       weight_range=(0.5, 2.0), seed=1)
 dataset = IIDSimulation(W=weighted_random_dag, n=2000, method='linear',
                         sem_type='gauss')

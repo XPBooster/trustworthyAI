@@ -29,17 +29,17 @@ class DataGenerator(object):
         # (i,j)=1 => node i -> node j
         self.true_graph = np.int32(np.abs(gtrue) > 1e-3)
 
-    def gen_instance_graph(self, max_length, dimension, test_mode=False):
+    def gen_instance_graph(self, num_nodes, dimension, test_mode=False):
         seq = np.random.randint(self.datasize, size=(dimension))
         input_ = self.inputdata[seq]
         return input_.T
 
     # Generate random batch for training procedure
-    def train_batch(self, batch_size, max_length, dimension):
+    def train_batch(self, batch_size, num_nodes, dimension):
         input_batch = []
 
         for _ in range(batch_size):
-            input_ = self.gen_instance_graph(max_length, dimension) # (feature_num, dimension(sample_seq))
+            input_ = self.gen_instance_graph(num_nodes, dimension) # (feature_num, dimension(sample_seq))
             input_batch.append(input_)
 
         return input_batch
@@ -58,7 +58,7 @@ class CausalDataSet(Dataset):
         if config.graph_path is None:
             gtrue = np.zeros(self.d)
         else:
-            gtrue = np.array(pd.read_csv(config.graph_path))
+            gtrue = np.array(pd.read_csv(config.graph_path, index_col=0))
             if config.transpose:
                 gtrue = np.transpose(gtrue)
 

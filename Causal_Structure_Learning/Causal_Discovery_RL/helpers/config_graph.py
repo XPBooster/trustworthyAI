@@ -19,16 +19,16 @@ def str2bool(v):
 net_arg = add_argument_group('Network')
 # Encoder
 net_arg.add_argument('--encoder_type', type=str, default='TransformerEncoder', help='type of encoder used')
-net_arg.add_argument('--hidden_dim', type=int, default=64, help='actor LSTM num_neurons')
+net_arg.add_argument('--d_model', type=int, default=32, help='actor neural num')
+net_arg.add_argument('--d_model_attn', type=int, default=16, help='actor neural num in self-attention')
 net_arg.add_argument('--num_heads', type=int, default=8, help='actor input embedding')
 net_arg.add_argument('--num_stacks', type=int, default=6, help='actor LSTM num_neurons')
 net_arg.add_argument('--residual', type=bool, default=True, help='whether to use residual for gat encoder')
 
 # Decoder
 net_arg.add_argument('--decoder_type', type=str, default='SingleLayerDecoder', help='type of decoder used')
-net_arg.add_argument('--decoder_activation', type=str, default='tanh',
-                     help='activation for decoder')    # Choose from: 'tanh', 'relu', 'none'
-net_arg.add_argument('--decoder_hidden_dim', type=int, default=16, help='hidden dimension for decoder')
+net_arg.add_argument('--decoder_activation', type=str, default='tanh', help='activation for decoder')    # Choose from: 'tanh', 'relu', 'none'
+net_arg.add_argument('--decoder_d_model', type=int, default=16, help='hidden dimension for decoder')
 net_arg.add_argument('--use_bias', type=bool, default=True, help='Whether to add bias term when calculating decoder logits')
 net_arg.add_argument('--use_bias_constant', type=bool, default=True, help='Whether to add bias term as CONSTANT when calculating decoder logits')
 net_arg.add_argument('--bias_initial_value', type=float, default=False, help='Initial value for bias term when calculating decoder logits')
@@ -37,7 +37,7 @@ net_arg.add_argument('--bias_initial_value', type=float, default=False, help='In
 data_arg = add_argument_group('Data')
 data_arg.add_argument('--batch_size', type=int, default=512, help='batch size for training')
 data_arg.add_argument('--input_dimension', type=int, default=64, help='dimension of reshaped vector') # reshaped
-data_arg.add_argument('--max_length', type=int, default=55, help='number of variables')
+data_arg.add_argument('--num_nodes', type=int, default=55, help='number of variables')
 data_arg.add_argument('--data_size', type=int, default=3000, help='Number of observational samples')
 
 data_arg.add_argument('--read_data', type=bool, default=True, help='read existing_data or not')
@@ -63,9 +63,12 @@ data_arg.add_argument('--lambda2_upper', type=float, default=-1, help='upper bou
 train_arg = add_argument_group('Training')
 train_arg.add_argument('--seed', type=int, default=8, help='seed')
 train_arg.add_argument('--nb_epoch', type=int, default=20000, help='nb epoch')
-train_arg.add_argument('--lr1_start', type=float, default=0.001, help='actor learning rate')
-train_arg.add_argument('--lr1_decay_step', type=int, default=5000, help='lr1 decay step')
-train_arg.add_argument('--lr1_decay_rate', type=float, default=0.96, help='lr1 decay rate')
+train_arg.add_argument('--lr1', type=float, default=0.001, help='actor learning rate')
+train_arg.add_argument('--lr1_tinit', type=float, default=4, help='the period of the first epoch of lr1')
+train_arg.add_argument('--lr1_tmult', type=float, default=2, help='the multiplier of the period of lr1')
+train_arg.add_argument('--lr2', type=float, default=0.001, help='actor learning rate')
+train_arg.add_argument('--lr2_tinit', type=float, default=4, help='the period of the first epoch of lr1')
+train_arg.add_argument('--lr2_tmult', type=float, default=2, help='the multiplier of the period of lr1')
 train_arg.add_argument('--alpha', type=float, default=0.99, help='update factor moving average baseline')
 train_arg.add_argument('--init_baseline', type=float, default=-1.0, help='initial baseline - REINFORCE')
 train_arg.add_argument('--temperature', type=float, default=3.0, help='pointer_net initial temperature')
@@ -94,7 +97,7 @@ def print_config():
     print('\n')
     print('Data Config:')
     print('* Batch size:',config.batch_size)
-    print('* Sequence length:',config.max_length)
+    print('* Sequence length:',config.num_nodes)
     print('* City coordinates:',config.input_dimension)
     print('\n')
     print('Network Config:')

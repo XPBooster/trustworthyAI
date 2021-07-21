@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from torch.utils.data import DataLoader
 from data_loader.dataset_read_data import CausalDataSet
-from models import Actor
-from rewards import get_Reward
+from models.actor_graph import Actor
+from rewards import Reward
 from helpers.config_graph import get_config, print_config
 from helpers.dir_utils import create_dir
 from helpers.log_helper import LogHelper, VisualLogger
@@ -47,7 +47,7 @@ def main():
         
         sl, su, strue = BIC_lambdas(training_set.inputdata, None, None, training_set.true_graph.T, reg_type, score_type)
         lambda1, lambda1_upper, lambda1_update_add = 0, 5, 1
-        lambda2, lambda2_upper, lambda2_update_mul = 1/(10**(np.round(config.max_length/3))), 0.01, 10
+        lambda2, lambda2_upper, lambda2_update_mul = 1/(10**(np.round(config.num_nodes/3))), 0.01, 10
         lambda_iter_num = config.lambda_iter_num
         _logger.info(f'Original sl: {sl}, su: {su}, strue: {strue}')
         _logger.info(f'Transformed sl: {sl}, su: {su}, lambda2: {lambda2}, true: {(strue-sl)/(su-sl)*lambda1_upper}')
@@ -60,17 +60,16 @@ def main():
             lambda1, lambda1_upper = 2, 2
         else:
             lambda1, lambda1_upper, lambda1_update_add = 0, 5, 1
-        lambda2, lambda2_upper, lambda2_update_mul = 1 / (10 ** (np.round(config.max_length/3))), 0.01, config.lambda2_update
+        lambda2, lambda2_upper, lambda2_update_mul = 1 / (10 ** (np.round(config.num_nodes/3))), 0.01, config.lambda2_update
         lambda_iter_num = config.lambda_iter_num
         
     # actor
     actor = Actor(config)
-    callreward = get_Reward(actor.batch_size, config.max_length, actor.input_dimension, training_set.inputdata,
-                            sl, su, lambda1_upper, score_type, reg_type, config.l1_graph_reg, False)
+    reward = Reward(config, training_set.inputdata, sl, su, lambda1_upper, False)
     _logger.info('RL Model: Finished creating training dataset, actor model and reward class')
 
     # Saver to save & restore all the variables.
-    # saver = tf.train.Saver(var_list=[v for v in tf.global_variables() if 'Adam' not in v.name], keep_checkpoint_every_n_hours=1.0)
+    saver = tf.train.Saver(var_list=[v for v in tf.global_variables() if 'Adam' not in v.name], keep_checkpoint_every_n_hours=1.0)
 
     _logger.info('Starting Training...')
     sess_config = tf.ConfigProto(log_device_placement=False)
@@ -106,9 +105,9 @@ def main():
 
                 batch_x = batch_x.numpy()
                 graphs_feed = sess.run(actor.graphs, feed_dict={actor.input_: batch_x})
-                reward_feed = callreward.cal_rewards(graphs_feed, lambda1, lambda2)
+                reward_feed = reward.cal_rewards(graphs_feed, lambda1, lambda2)
 
-                max_reward = -callreward.update_scores([max_reward_score_cyc], lambda1, lambda2)[0]
+                max_reward = -reward.update_scores([max_reward_score_cyc], lambda1, lambda2)[0]
                 max_reward_batch = float('inf')
                 max_reward_batch_score_cyc = (0, 0)
 
@@ -187,11 +186,11 @@ def main():
 
                 # update lambda1, lamda2
                 if (i+1) % lambda_iter_num == 0:
-                    ls_kv = callreward.update_all_scores(lambda1, lambda2)
+                    ls_kv = reward.update_all_scores(lambda1, lambda2)
                     # np.save(f'{output_dir}/solvd_dict_epoch_{i}.npy', np.array(ls_kv))
-                    max_rewards_re = callreward.update_scores(max_rewards, lambda1, lambda2)
-                    rewards_batches_re = callreward.update_scores(rewards_batches, lambda1, lambda2)
-                    reward_max_per_batch_re = callreward.update_scores(reward_max_per_batch, lambda1, lambda2)
+                    max_rewards_re = reward.update_scores(max_rewards, lambda1, lambda2)
+                    rewards_batches_re = reward.update_scores(rewards_batches, lambda1, lambda2)
+                    reward_max_per_batch_re = reward.update_scores(reward_max_per_batch, lambda1, lambda2)
 
                     # saved somewhat more detailed logging info
                     np.save(f'{output_dir}/solvd_dict.npy', np.array(ls_kv))

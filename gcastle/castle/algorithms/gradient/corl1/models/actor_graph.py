@@ -27,7 +27,7 @@ class Actor(object):
         self.config = config
         self.is_train = True
         self.batch_size = config.batch_size  # batch size
-        self.max_length = config.max_length  
+        self.num_nodes = config.num_nodes  
         self.input_dimension = config.input_dimension  
 
         self.gamma = 0.98
@@ -37,27 +37,27 @@ class Actor(object):
         self.global_step2 = tf.Variable(0, trainable=False, name="global_step2")  # global step
         self.lr2 = 0.001
 
-        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length, self.input_dimension],
+        self.input_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes, self.input_dimension],
                                      name="input_coordinates")
-        self.input_true_order_ = tf.placeholder(tf.int32, [self.batch_size, self.max_length],
+        self.input_true_order_ = tf.placeholder(tf.int32, [self.batch_size, self.num_nodes],
                                                 name="input_order")
         self.reward_ = tf.placeholder(tf.float32, [self.batch_size], name='input_rewards')
-        self.reward_list_ = tf.placeholder(tf.float32, [self.batch_size, self.max_length], name='input_reward_list')
-        self.target_values_ = tf.placeholder(tf.float32, [self.max_length, self.batch_size], name='target_values_')
-        self.i_list_ev = tf.placeholder(tf.float32, [self.max_length - 1, self.batch_size, self.input_dimension],
+        self.reward_list_ = tf.placeholder(tf.float32, [self.batch_size, self.num_nodes], name='input_reward_list')
+        self.target_values_ = tf.placeholder(tf.float32, [self.num_nodes, self.batch_size], name='target_values_')
+        self.i_list_ev = tf.placeholder(tf.float32, [self.num_nodes - 1, self.batch_size, self.input_dimension],
                                         name='input_critic_eva')
-        self.i_list_ta = tf.placeholder(tf.float32, [self.max_length - 1, self.batch_size, self.input_dimension],
+        self.i_list_ta = tf.placeholder(tf.float32, [self.num_nodes - 1, self.batch_size, self.input_dimension],
                                         name='input_critic_tar')
 
-        self.prev_state_0 = tf.placeholder(tf.float32, [self.max_length*self.batch_size, self.input_dimension],
+        self.prev_state_0 = tf.placeholder(tf.float32, [self.num_nodes*self.batch_size, self.input_dimension],
                                         name='prev_state')
-        self.prev_state_1 = tf.placeholder(tf.float32, [self.max_length * self.batch_size, self.input_dimension],
+        self.prev_state_1 = tf.placeholder(tf.float32, [self.num_nodes * self.batch_size, self.input_dimension],
                                            name='prev_state')
-        self.prev_input = tf.placeholder(tf.float32, [self.max_length*self.batch_size, self.input_dimension],
+        self.prev_input = tf.placeholder(tf.float32, [self.num_nodes*self.batch_size, self.input_dimension],
                                         name='prev_input')
-        self.position = tf.placeholder(tf.float32, [self.max_length*self.batch_size],
+        self.position = tf.placeholder(tf.float32, [self.num_nodes*self.batch_size],
                                         name='position')
-        self.action_mask_ = tf.placeholder(tf.float32, [self.max_length * self.batch_size, self.max_length],
+        self.action_mask_ = tf.placeholder(tf.float32, [self.num_nodes * self.batch_size, self.num_nodes],
                                        name='action_mask_')
 
         self.build_permutation()
@@ -93,7 +93,7 @@ class Actor(object):
             if self.config.decoder_type == 'PointerDecoder' or 'MLPDecoder':
                 self.positions, self.mask_scores, self.s0_list, self.s1_list, self.i_list = self.decoder.loop_decode()
                 log_softmax = self.decoder.decode_softmax(self.prev_state_0, self.prev_state_1, self.prev_input, self.position, self.action_mask_)
-                self.log_softmax = tf.transpose(tf.reshape(log_softmax, [self.batch_size, self.max_length]),[1,0])
+                self.log_softmax = tf.transpose(tf.reshape(log_softmax, [self.batch_size, self.num_nodes]),[1,0])
             else:
                 raise ('Please choose decoder')
 
@@ -122,13 +122,13 @@ class Actor(object):
             self.advantages = []
             self.reward_baselines = []
 
-            td_target = self.target_values_[:-1]  #(max_length, batch)
+            td_target = self.target_values_[:-1]  #(num_nodes, batch)
             self.advantage = td_target - self.critic.predictions_ev
 
-            # assert advantage.shape == (self.max_length-1,self.batch_size,)
+            # assert advantage.shape == (self.num_nodes-1,self.batch_size,)
             advantage_st = tf.stop_gradient(self.advantage)
             step_loss = advantage_st * self.log_softmax[:-1]
-            # assert step_loss.shape == (self.max_length-1,self.batch_size,)
+            # assert step_loss.shape == (self.num_nodes-1,self.batch_size,)
 
             # Loss
             self.loss1 = - tf.reduce_mean(step_loss)
